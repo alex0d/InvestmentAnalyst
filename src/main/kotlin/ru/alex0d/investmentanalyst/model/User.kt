@@ -14,6 +14,8 @@ class User(
     var firstname: String,
     var lastname: String? = null,
     var email: String,
+
+    @JsonIgnore
     private val password: String,
 
     @Enumerated(EnumType.STRING)
@@ -24,6 +26,7 @@ class User(
     var portfolio: Portfolio,
 
     @OneToMany(mappedBy = "user", cascade = [CascadeType.ALL], fetch = FetchType.EAGER)
+    @JsonIgnore
     var watchlists: MutableList<Watchlist> = mutableListOf()
 ) : UserDetails {
 
