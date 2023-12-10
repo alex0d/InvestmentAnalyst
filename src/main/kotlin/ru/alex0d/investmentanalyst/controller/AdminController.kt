@@ -1,5 +1,9 @@
 package ru.alex0d.investmentanalyst.controller
 
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.Parameter
+import io.swagger.v3.oas.annotations.responses.ApiResponse
+import io.swagger.v3.oas.annotations.responses.ApiResponses
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.annotation.AuthenticationPrincipal
@@ -15,13 +19,22 @@ class AdminController(
     private val adminService: AdminService
 ) {
 
+    @Operation(summary = "Get all users")
+    @ApiResponse(responseCode = "200", description = "Users retrieved successfully")
     @GetMapping("/users")
     fun getUsers(): List<User> = adminService.getUsers()
 
+    @Operation(summary = "Update user")
+    @ApiResponses(
+        value = [
+            ApiResponse(responseCode = "200", description = "User updated successfully"),
+            ApiResponse(responseCode = "400", description = "Bad request")
+        ]
+    )
     @PutMapping("/users/{id}")
     fun updateUser(
         @AuthenticationPrincipal user: User,
-        @PathVariable id: Int,
+        @Parameter(description = "User id") @PathVariable id: Int,
         @RequestBody updateUserDto: UpdateUserDto
     ): ResponseEntity<String> {
         if (user.id == id && updateUserDto.role != null) {
@@ -31,10 +44,17 @@ class AdminController(
         return ResponseEntity.ok("User updated")
     }
 
+    @Operation(summary = "Delete user")
+    @ApiResponses(
+        value = [
+            ApiResponse(responseCode = "200", description = "User deleted successfully"),
+            ApiResponse(responseCode = "400", description = "Bad request. You can't delete yourself")
+        ]
+    )
     @DeleteMapping("/users/{id}")
     fun deleteUser(
         @AuthenticationPrincipal user: User,
-        @PathVariable id: Int
+        @Parameter(description = "User id") @PathVariable id: Int
     ): ResponseEntity<String> {
         if (user.id == id) {
             return ResponseEntity.badRequest().body("You can't delete yourself")
