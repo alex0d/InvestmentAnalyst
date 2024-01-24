@@ -34,18 +34,12 @@ class PortfolioService(
                 ?: throw Exception("Empty response body")
             val requestedStock = Json.decodeFromString<List<Quote>>(body)[0]
 
-            val totalValue = requestedStock.price!! * stock.amount
+            val totalValue = requestedStock.price * stock.amount
             val profit = totalValue - stock.amount * stock.buyingPrice
             val profitPercent = profit / (stock.amount * stock.buyingPrice) * 100
 
             PortfolioStockInfoDto(
-                stock.ticker,
-                requestedStock.name!!,
-                stock.amount,
-                requestedStock.price!!,
-                totalValue,
-                profit,
-                profitPercent
+                requestedStock, stock.amount, totalValue, profit, profitPercent
             )
         }
 
@@ -54,10 +48,7 @@ class PortfolioService(
         val totalProfitPercent = totalProfit / totalValue * 100
 
         return PortfolioInfoDto(
-            totalValue = totalValue,
-            totalProfit = totalProfit,
-            totalProfitPercent = totalProfitPercent,
-            stocks = stockDtos
+            totalValue, totalProfit, totalProfitPercent, stockDtos
         )
     }
 
@@ -82,19 +73,15 @@ class PortfolioService(
         val portfolio = portfolioRepository.getPortfolioByUser(user)
 
         var stock = portfolio.stocks.find { it.ticker == buyStockRequest.ticker }
-        if (stock != null) {
-            stock.buyingPrice =
-                (stock.buyingPrice * stock.amount + buyStockRequest.amount * requestedStock.price!!) / (stock.amount + buyStockRequest.amount)
-            stock.amount += buyStockRequest.amount
-        } else {
-            stock = PortfolioStock(
-                portfolio = portfolio,
-                ticker = buyStockRequest.ticker,
-                amount = buyStockRequest.amount,
-                buyingPrice = requestedStock.price!!
-            )
-            portfolio.stocks.add(stock)
+
+        stock?.apply {
+            buyingPrice = (buyingPrice * amount + buyStockRequest.amount * requestedStock.price) / (amount + buyStockRequest.amount)
+            amount += buyStockRequest.amount
+        } ?: run {
+            stock = PortfolioStock(portfolio, buyStockRequest.ticker, buyStockRequest.amount, requestedStock.price)
+            portfolio.stocks.add(stock!!)
         }
+
         portfolioRepository.save(portfolio)
         return true
     }

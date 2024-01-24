@@ -6,9 +6,6 @@ import jakarta.persistence.*
 @Entity
 @Table(name = "portfolios")
 class Portfolio(
-    @Id @GeneratedValue
-    var id: Int = 0,
-
     @MapsId
     @JoinColumn(name = "id")
     @OneToOne(cascade = [CascadeType.ALL])
@@ -16,5 +13,8 @@ class Portfolio(
     var user: User? = null,
 
     @OneToMany(mappedBy = "portfolio", cascade = [CascadeType.ALL])
-    var stocks: MutableList<PortfolioStock> = mutableListOf()
+    var stocks: MutableList<PortfolioStock> = mutableListOf(),
+
+    @Id @GeneratedValue
+    var id: Int = 0
 )

@@ -6,9 +6,6 @@ import jakarta.persistence.*
 @Entity
 @Table(name = "watchlists")
 class Watchlist(
-    @Id @GeneratedValue
-    var id: Int = 0,
-
     var title: String,
 
     @ManyToOne(cascade = [CascadeType.MERGE])
@@ -16,5 +13,8 @@ class Watchlist(
     var user: User? = null,
 
     @OneToMany(mappedBy = "watchlist", cascade = [CascadeType.ALL])
-    var items: MutableList<WatchlistItem> = mutableListOf()
+    var items: MutableList<WatchlistItem> = mutableListOf(),
+
+    @Id @GeneratedValue
+    var id: Int = 0
 )

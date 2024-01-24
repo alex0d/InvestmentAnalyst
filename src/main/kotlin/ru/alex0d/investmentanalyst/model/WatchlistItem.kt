@@ -6,9 +6,6 @@ import jakarta.persistence.*
 @Entity
 @Table(name = "watchlist_items")
 class WatchlistItem(
-    @Id @GeneratedValue
-    var id: Int = 0,
-
     @ManyToOne
     @JsonIgnore
     var watchlist: Watchlist?,
@@ -19,4 +16,7 @@ class WatchlistItem(
     var upperPrice: Double?,
 
     var comment: String?,
+
+    @Id @GeneratedValue
+    var id: Int = 0
 )

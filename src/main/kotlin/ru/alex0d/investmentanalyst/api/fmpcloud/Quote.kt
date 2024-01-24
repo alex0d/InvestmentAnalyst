@@ -4,9 +4,9 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class Quote(
-    var symbol: String?,
-    var name: String?,
-    var price: Double?,
+    var symbol: String,
+    var name: String,
+    var price: Double,
     var changesPercentage: Double?,
     var change: Double?,
     var dayLow: Double?,

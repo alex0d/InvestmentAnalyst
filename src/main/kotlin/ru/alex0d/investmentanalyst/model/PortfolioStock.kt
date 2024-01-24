@@ -6,9 +6,6 @@ import jakarta.persistence.*
 @Entity
 @Table(name = "portfolio_stocks")
 class PortfolioStock(
-    @Id @GeneratedValue
-    var id: Int = 0,
-
     @ManyToOne
     @JsonIgnore
     var portfolio: Portfolio?,
@@ -17,5 +14,8 @@ class PortfolioStock(
 
     var amount: Int,
 
-    var buyingPrice: Double
+    var buyingPrice: Double,
+
+    @Id @GeneratedValue
+    var id: Int = 0
 )
