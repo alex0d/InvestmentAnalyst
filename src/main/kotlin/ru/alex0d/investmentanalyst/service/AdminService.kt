@@ -12,13 +12,13 @@ class AdminService(
 ) {
     fun getUsers(): List<User> = userRepository.findAll()
 
-    fun updateUser(id: Int, updateUserDto: UpdateUserDto) {
+    fun updateUser(id: Int, updateUserDto: UpdateUserDto): User {
         val user = userRepository.findById(id).get()
         updateUserDto.firstname?.let { user.firstname = it }
         updateUserDto.lastname?.let { user.lastname = it }
         updateUserDto.email?.let { user.email = it }
         updateUserDto.role?.let { user.role = Role.valueOf(it) }
-        userRepository.save(user)
+        return userRepository.save(user)
     }
 
     fun deleteUser(id: Int) = userRepository.deleteById(id)

@@ -13,6 +13,7 @@ import ru.alex0d.investmentanalyst.model.User
 import ru.alex0d.investmentanalyst.service.AdminService
 
 @RestController
+@CrossOrigin
 @RequestMapping("/api/admin")
 @PreAuthorize("hasRole('ADMIN')")
 class AdminController(
@@ -36,12 +37,11 @@ class AdminController(
         @AuthenticationPrincipal user: User,
         @Parameter(description = "User id") @PathVariable id: Int,
         @RequestBody updateUserDto: UpdateUserDto
-    ): ResponseEntity<String> {
+    ): ResponseEntity<User> {
         if (user.id == id && updateUserDto.role != null) {
-            return ResponseEntity.badRequest().body("You can't change your own role")
+            return ResponseEntity.badRequest().build()
         }
-        adminService.updateUser(id, updateUserDto)
-        return ResponseEntity.ok("User updated")
+        return ResponseEntity.ok(adminService.updateUser(id, updateUserDto))
     }
 
     @Operation(summary = "Delete user")
