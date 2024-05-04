@@ -7,6 +7,7 @@ import io.jsonwebtoken.security.Keys
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.stereotype.Service
+import ru.alex0d.investmentanalyst.model.User
 import java.util.*
 import javax.crypto.SecretKey
 
@@ -18,10 +19,16 @@ class JwtService {
     @Value("\${application.security.jwt.expiration}")
     private var jwtExpiration: Long = 1000 * 60 * 60 * 10  // 10 hours
 
-    fun generateToken(userDetails: UserDetails): String =
-        generateToken(emptyMap(), userDetails)
+    fun generateToken(user: User): String {
+        val extraClaims = mapOf(
+            "firstname" to user.firstname,
+            "lastname" to user.lastname,
+            "authorities" to user.authorities.map { it.authority }
+        )
+        return generateToken(extraClaims, user)
+    }
 
-    fun generateToken(extraClaims: Map<String, Any>, userDetails: UserDetails): String =
+    fun generateToken(extraClaims: Map<String, Any?>, userDetails: UserDetails): String =
         Jwts.builder()
             .claims(extraClaims)
             .subject(userDetails.username)

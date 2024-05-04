@@ -10,6 +10,7 @@ import ru.alex0d.investmentanalyst.dto.*
 import ru.alex0d.investmentanalyst.service.WatchlistService
 
 @RestController
+@CrossOrigin
 @RequestMapping("/api/watchlist")
 class WatchlistController(
     private val watchlistService: WatchlistService

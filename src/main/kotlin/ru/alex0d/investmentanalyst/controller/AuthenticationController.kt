@@ -4,16 +4,14 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.security.SecurityRequirements
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import ru.alex0d.investmentanalyst.dto.AuthenticationRequest
 import ru.alex0d.investmentanalyst.dto.AuthenticationResponse
 import ru.alex0d.investmentanalyst.dto.RegisterRequest
 import ru.alex0d.investmentanalyst.service.AuthenticationService
 
 @RestController
+@CrossOrigin
 @RequestMapping("/api/auth")
 @SecurityRequirements  // Disable Swagger UI security for this controller
 class AuthenticationController(

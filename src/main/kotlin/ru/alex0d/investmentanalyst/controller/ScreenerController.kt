@@ -5,14 +5,12 @@ import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import kotlinx.serialization.json.Json
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import ru.alex0d.investmentanalyst.api.fmpcloud.StockChange
 import ru.alex0d.investmentanalyst.api.makeRequest
 
 @RestController
+@CrossOrigin
 @RequestMapping("/api/screener")
 class ScreenerController {
     @Value("\${application.fmpcloud.key}")

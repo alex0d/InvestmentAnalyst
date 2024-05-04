@@ -41,7 +41,7 @@ class WatchlistService(
                     ?: throw Exception("Empty response body")
                 val requestedStock = Json.decodeFromString<List<Quote>>(body)[0]
 
-                WatchlistItemDto(it, requestedStock.price!!)
+                WatchlistItemDto(it, requestedStock.price)
             }
         )
         if (withPriceInRangeOnly) {
@@ -92,7 +92,7 @@ class WatchlistService(
             ?: throw Exception("Empty response body")
         val requestedStock = Json.decodeFromString<List<Quote>>(body)[0]
 
-        return WatchlistItemDto(savedWatchlistItem, requestedStock.price!!)
+        return WatchlistItemDto(savedWatchlistItem, requestedStock.price)
     }
 
     fun removeTickerFromWatchlist(watchlistId: Int, watchlistItemId: Int) {

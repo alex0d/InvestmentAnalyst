@@ -101,7 +101,7 @@ class PortfolioService(
             val requestedStock = Json.decodeFromString<List<Quote>>(body)[0]
 
             stock.buyingPrice =
-                (stock.buyingPrice * stock.amount - sellStockRequest.amount * requestedStock.price!!) / (stock.amount - sellStockRequest.amount)
+                (stock.buyingPrice * stock.amount - sellStockRequest.amount * requestedStock.price) / (stock.amount - sellStockRequest.amount)
             stock.amount -= sellStockRequest.amount
         }
         portfolioRepository.save(portfolio)

@@ -11,6 +11,7 @@ import ru.alex0d.investmentanalyst.dto.SellStockRequest
 import ru.alex0d.investmentanalyst.service.PortfolioService
 
 @RestController
+@CrossOrigin
 @RequestMapping("/api/portfolio")
 class PortfolioController(
     private val portfolioService: PortfolioService

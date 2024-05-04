@@ -5,15 +5,13 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import kotlinx.serialization.json.Json
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import ru.alex0d.investmentanalyst.api.fmpcloud.Quote
 import ru.alex0d.investmentanalyst.api.fmpcloud.Rating
 import ru.alex0d.investmentanalyst.api.makeRequest
 
 @RestController
+@CrossOrigin
 @RequestMapping("/api")
 class StockInfoController {
     @Value("\${application.fmpcloud.key}")
