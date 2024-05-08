@@ -39,7 +39,7 @@ class PortfolioController(
     fun buyStock(@RequestBody buyStockRequest: BuyStockRequest): ResponseEntity<String> {
         return if (buyStockRequest.amount <= 0) {
             ResponseEntity.badRequest().body("Amount must be positive")
-        } else if (buyStockRequest.ticker.isBlank()) {
+        } else if (buyStockRequest.uid.isBlank()) {
             ResponseEntity.badRequest().body("Ticker must not be blank")
         } else if (portfolioService.buyStock(buyStockRequest)) {
             ResponseEntity.ok("Stock bought")
@@ -54,7 +54,7 @@ class PortfolioController(
     fun sellStock(@RequestBody sellStockRequest: SellStockRequest): ResponseEntity<String> {
         return if (sellStockRequest.amount <= 0) {
             ResponseEntity.badRequest().body("Amount must be positive")
-        } else if (sellStockRequest.ticker.isBlank()) {
+        } else if (sellStockRequest.uid.isBlank()) {
             ResponseEntity.badRequest().body("Ticker must not be blank")
         } else if (portfolioService.sellStock(sellStockRequest)) {
             ResponseEntity.ok("Stock sold")

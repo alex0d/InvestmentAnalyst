@@ -19,6 +19,8 @@ application:
     key: ${FMPCLOUD_KEY}
   finage:
     key: ${FINAGE_KEY}
+  tinkoff:
+    key: ${TINKOFF_KEY}
   security:
     jwt:
       secret-key: a89c1f6f36f57fda65f1155a296c1a068b3d70903bfbbe87a324556436403a91

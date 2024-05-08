@@ -9,6 +9,7 @@ services:
       POSTGRESQL_PASSWORD: ${POSTGRESQL_PASSWORD:-password}
       FMPCLOUD_KEY: ${FMPCLOUD_KEY}
       FINAGE_KEY: ${FINAGE_KEY}
+      TINKOFF_KEY: ${TINKOFF_KEY}
     ports:
       - "8080:8080"
     depends_on:
