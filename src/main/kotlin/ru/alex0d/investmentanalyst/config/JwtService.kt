@@ -16,26 +16,37 @@ class JwtService {
     @Value("\${application.security.jwt.secret-key}")
     private lateinit var secretKey: String
 
-    @Value("\${application.security.jwt.expiration}")
-    private var jwtExpiration: Long = 1000 * 60 * 60 * 10  // 10 hours
+    @Value("\${application.security.jwt.refresh-lifetime}")
+    private var refreshTokenLifetime: Long = 2592000000  // 30 days
 
-    fun generateToken(user: User): String {
+    @Value("\${application.security.jwt.access-lifetime}")
+    private var accessTokenLifetime: Long = 1000 * 60 * 30  // 30 minutes
+
+    fun generateAccessToken(user: User): String {
         val extraClaims = mapOf(
             "firstname" to user.firstname,
             "lastname" to user.lastname,
             "authorities" to user.authorities.map { it.authority }
         )
-        return generateToken(extraClaims, user)
+        return generateAccessToken(extraClaims, user)
     }
 
-    fun generateToken(extraClaims: Map<String, Any?>, userDetails: UserDetails): String =
+    fun generateAccessToken(extraClaims: Map<String, Any?>, userDetails: UserDetails): String =
         Jwts.builder()
             .claims(extraClaims)
             .subject(userDetails.username)
             .issuedAt(Date(System.currentTimeMillis()))
-            .expiration(Date(System.currentTimeMillis() + jwtExpiration))
+            .expiration(Date(System.currentTimeMillis() + accessTokenLifetime))
             .signWith(getSignInKey(), Jwts.SIG.HS256)
             .compact()
+
+    fun generateRefreshToken(userDetails: UserDetails): String {
+        return Jwts.builder()
+            .issuedAt(Date(System.currentTimeMillis()))
+            .expiration(Date(System.currentTimeMillis() + refreshTokenLifetime))
+            .signWith(getSignInKey(), Jwts.SIG.HS256)
+            .compact()
+    }
 
     fun isTokenValid(token: String, userDetails: UserDetails): Boolean {
         val username = extractUsername(token)
@@ -49,7 +60,11 @@ class JwtService {
     fun extractUsername(token: String) = extractClaim(token) { it.subject }
 
     fun <T> extractClaim(token: String, claimsResolver: (Claims) -> T?): T? {
-        val claims = extractAllClaims(token)
+        val claims = try {
+            extractAllClaims(token)
+        } catch (e: Exception) {
+            return null
+        }
         return claimsResolver(claims)
     }
 

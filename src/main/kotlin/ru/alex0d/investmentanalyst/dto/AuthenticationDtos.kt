@@ -13,5 +13,10 @@ data class AuthenticationRequest(
 )
 
 data class AuthenticationResponse(
-    val token: String
+    val accessToken: String,
+    val refreshToken: String
+)
+
+data class RefreshTokenRequest(
+    val refreshToken: String
 )

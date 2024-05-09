@@ -34,6 +34,10 @@ class SecurityConfig(
             }
             .authenticationProvider(authenticationProvider)
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter::class.java)
+            .exceptionHandling { exception ->
+                exception
+                    .authenticationEntryPoint(AuthenticatedEntryPoint())
+            }
             .build()
         }
     }

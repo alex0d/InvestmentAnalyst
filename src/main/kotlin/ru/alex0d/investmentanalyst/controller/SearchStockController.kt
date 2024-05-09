@@ -4,13 +4,9 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.security.SecurityRequirements
-import kotlinx.serialization.json.Json
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
-import ru.alex0d.investmentanalyst.api.fmpcloud.StockChange
-import ru.alex0d.investmentanalyst.api.makeRequest
 import ru.alex0d.investmentanalyst.dto.TinkoffInstrumentShort
-import ru.tinkoff.piapi.contract.v1.InstrumentShort
 import ru.tinkoff.piapi.core.InvestApi
 
 @RestController
