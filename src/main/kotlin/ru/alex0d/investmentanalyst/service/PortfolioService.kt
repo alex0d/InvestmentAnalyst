@@ -46,7 +46,8 @@ class PortfolioService(
                 ticker = stock.ticker,
                 name = stock.name,
                 amount = stock.amount,
-                price = requestedPrice.price.toBigDecimal(),
+                averagePrice = stock.averagePrice,
+                lastPrice = requestedPrice.price.toBigDecimal(),
                 totalValue = totalValue,
                 profit = profit,
                 profitPercent = profitPercent,
@@ -102,8 +103,8 @@ class PortfolioService(
         var stock = portfolio.stocks.find { it.uid == requestedStock.uid }
 
         stock?.apply {
-            buyingPrice =
-                recalculateBuyingPrice(buyingPrice, amount, requestedPrice.price.toBigDecimal(), buyStockRequest.amount)
+            averagePrice =
+                recalculateAveragePrice(averagePrice, amount, requestedPrice.price.toBigDecimal(), buyStockRequest.amount)
             amount += buyStockRequest.amount
         } ?: run {
             stock = PortfolioStock(
@@ -112,7 +113,7 @@ class PortfolioService(
                 ticker = requestedStock.ticker,
                 name = requestedStock.name,
                 amount = buyStockRequest.amount,
-                buyingPrice = requestedPrice.price.toBigDecimal(),
+                averagePrice = requestedPrice.price.toBigDecimal(),
                 logoUrl = interfaceProperties[0].takeWhile { it != '.' },  // remove file extension
                 backgroundColor = interfaceProperties[1],
                 textColor = interfaceProperties[2],
@@ -143,8 +144,8 @@ class PortfolioService(
             } catch (e: Exception) {
                 return false
             }
-            stock.buyingPrice =
-                (stock.buyingPrice * stock.amount.toBigDecimal() - requestedPrice.price.toBigDecimal() * sellStockRequest.amount.toBigDecimal()) / (stock.amount.toBigDecimal() - sellStockRequest.amount.toBigDecimal())
+            stock.averagePrice =
+                (stock.averagePrice * stock.amount.toBigDecimal() - requestedPrice.price.toBigDecimal() * sellStockRequest.amount.toBigDecimal()) / (stock.amount.toBigDecimal() - sellStockRequest.amount.toBigDecimal())
             stock.amount -= sellStockRequest.amount
         }
 
@@ -158,25 +159,25 @@ private fun calculateTotalValue(stock: PortfolioStock, requestedPrice: LastPrice
 }
 
 private fun calculateProfit(stock: PortfolioStock, totalValue: BigDecimal): BigDecimal {
-    return (totalValue - stock.amount.toBigDecimal() * stock.buyingPrice).setScale(2, RoundingMode.HALF_UP)
+    return (totalValue - stock.amount.toBigDecimal() * stock.averagePrice).setScale(2, RoundingMode.HALF_UP)
 }
 
 private fun calculateProfitPercent(stock: PortfolioStock, profit: BigDecimal): BigDecimal {
-    return (profit / (stock.amount.toBigDecimal() * stock.buyingPrice) * BigDecimal(100)).setScale(
+    return (profit / (stock.amount.toBigDecimal() * stock.averagePrice) * BigDecimal(100)).setScale(
         2,
         RoundingMode.HALF_UP
     )
 }
 
-private fun recalculateBuyingPrice(
-    oldBuyingPrice: BigDecimal,
+private fun recalculateAveragePrice(
+    oldAveragePrice: BigDecimal,
     oldAmount: Int,
     newBuyingPrice: BigDecimal,
     newAmount: Int
 ): BigDecimal {
     val oldAmount = oldAmount.toBigDecimal()
     val newAmount = newAmount.toBigDecimal()
-    return (oldBuyingPrice * oldAmount + newBuyingPrice * newAmount) / (oldAmount + newAmount).setScale(
+    return (oldAveragePrice * oldAmount + newBuyingPrice * newAmount) / (oldAmount + newAmount).setScale(
         2,
         RoundingMode.HALF_UP
     )

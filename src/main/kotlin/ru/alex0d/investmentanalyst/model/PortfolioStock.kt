@@ -16,7 +16,7 @@ class PortfolioStock(
     var name: String,
 
     var amount: Int,
-    var buyingPrice: BigDecimal,
+    var averagePrice: BigDecimal,
 
     var logoUrl: String,
     var backgroundColor: String,
