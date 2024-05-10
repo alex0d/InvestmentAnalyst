@@ -60,7 +60,7 @@ class PortfolioService(
         val totalValue = stockDtos.sumOf { it.totalValue }.setScale(2, RoundingMode.HALF_UP)
         val totalProfit = stockDtos.sumOf { it.profit }.setScale(2, RoundingMode.HALF_UP)
         val totalProfitPercent =
-            (if (totalValue.compareTo(BigDecimal.ZERO) != 0) totalProfit / totalValue * BigDecimal(100) else BigDecimal.ZERO)
+            (if (totalValue.compareTo(BigDecimal.ZERO) != 0) totalProfit.setScale(4) / totalValue * BigDecimal(100) else BigDecimal.ZERO)
                 .setScale(2, RoundingMode.HALF_UP)
 
         return PortfolioInfoDto(
@@ -163,7 +163,7 @@ private fun calculateProfit(stock: PortfolioStock, totalValue: BigDecimal): BigD
 }
 
 private fun calculateProfitPercent(stock: PortfolioStock, profit: BigDecimal): BigDecimal {
-    return (profit / (stock.amount.toBigDecimal() * stock.averagePrice) * BigDecimal(100)).setScale(
+    return (profit.setScale(4) / (stock.amount.toBigDecimal() * stock.averagePrice) * BigDecimal(100)).setScale(
         2,
         RoundingMode.HALF_UP
     )
