@@ -23,11 +23,12 @@ class SearchStockController(
         return ResponseEntity.ok(
             investApi.instrumentsService.findInstrumentSync(ticker)
                 .filter { it.instrumentType == "share" && it.apiTradeAvailableFlag }
-                .take(5)
+                .take(20)
                 .map {
                     val lastPrice = investApi.marketDataService.getLastPricesSync(listOf(it.uid)).first().price.toBigDecimal()
                     TinkoffShare(share = investApi.instrumentsService.getShareByUidSync(it.uid), lastPrice = lastPrice)
                 }
+                .filter { it.currency == "rub" }
         )
     }
 }
