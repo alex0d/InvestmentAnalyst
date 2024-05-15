@@ -15,22 +15,24 @@ data class TinkoffShare(
     val countryOfRisk: String,
     val countryOfRiskName: String,
     val sector: String,
+    val lot: Int,
     var lastPrice: BigDecimal = BigDecimal.ZERO,
     var url: String = "",
     var backgroundColor: String = "#ffffff",
     var textColor: String = "#000000",
 ) {
     constructor(share: Share, lastPrice: BigDecimal) : this(
-        share.uid,
-        share.figi,
-        share.ticker,
-        share.classCode,
-        share.isin,
-        share.currency,
-        share.name,
-        share.countryOfRisk,
-        share.countryOfRiskName,
-        share.sector
+        uid = share.uid,
+        figi = share.figi,
+        ticker = share.ticker,
+        classCode = share.classCode,
+        isin = share.isin,
+        currency = share.currency,
+        name = share.name,
+        countryOfRisk = share.countryOfRisk,
+        countryOfRiskName = share.countryOfRiskName,
+        sector = share.sector,
+        lot = share.lot
     ) {
         this.lastPrice = lastPrice
 
