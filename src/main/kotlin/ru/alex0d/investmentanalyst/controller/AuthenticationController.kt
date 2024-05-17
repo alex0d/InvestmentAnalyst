@@ -11,6 +11,7 @@ import ru.alex0d.investmentanalyst.dto.AuthenticationResponse
 import ru.alex0d.investmentanalyst.dto.RefreshTokenRequest
 import ru.alex0d.investmentanalyst.dto.RegisterRequest
 import ru.alex0d.investmentanalyst.service.AuthenticationService
+import ru.alex0d.investmentanalyst.service.AuthenticationStatus
 
 @RestController
 @CrossOrigin
@@ -22,16 +23,26 @@ class AuthenticationController(
 
     @Operation(summary = "Register a new user")
     @ApiResponse(responseCode = "200", description = "User registered successfully")
+    @ApiResponse(responseCode = "409", description = "User with specified email already exists")
     @PostMapping("/register")
     fun register(@RequestBody request: RegisterRequest): ResponseEntity<AuthenticationResponse> {
-        return ResponseEntity.ok(authenticationService.register(request))
+        authenticationService.register(request)?.let {
+            return ResponseEntity.ok(it)
+        } ?: return ResponseEntity.status(409).build()
     }
 
     @Operation(summary = "Authenticate a user")
     @ApiResponse(responseCode = "200", description = "User authenticated successfully")
+    @ApiResponse(responseCode = "401", description = "Password incorrect")
+    @ApiResponse(responseCode = "422", description = "User not found")
     @PostMapping("/authenticate")
-    fun register(@RequestBody request: AuthenticationRequest): ResponseEntity<AuthenticationResponse> {
-        return ResponseEntity.ok(authenticationService.authenticate(request))
+    fun authenticate(@RequestBody request: AuthenticationRequest): ResponseEntity<AuthenticationResponse> {
+        val authResult = authenticationService.authenticate(request)
+        return when (authResult.first) {
+            AuthenticationStatus.OK -> ResponseEntity.ok(authResult.second!!)
+            AuthenticationStatus.USER_NOT_FOUND -> ResponseEntity.status(422).build()
+            AuthenticationStatus.PASSWORD_INCORRECT -> ResponseEntity.status(401).build()
+        }
     }
 
     @Operation(summary = "Refresh the access token")
