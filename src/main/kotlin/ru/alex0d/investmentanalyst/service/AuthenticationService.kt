@@ -21,7 +21,11 @@ class AuthenticationService(
     private val passwordEncoder: PasswordEncoder,
     private val jwtService: JwtService
 ) {
-    fun register(request: RegisterRequest): AuthenticationResponse {
+    fun register(request: RegisterRequest): AuthenticationResponse? {
+        if (userRepository.findByEmail(request.email) != null) {
+            return null
+        }
+
         val portfolio = Portfolio()
         val user = User(
             firstname = request.firstname,
@@ -43,11 +47,21 @@ class AuthenticationService(
         refreshTokenRepository.save(refreshToken)
 
         val accessToken = jwtService.generateAccessToken(user)
-        return AuthenticationResponse(accessToken, jwtRefreshToken)
+        return AuthenticationResponse(
+            firstname = user.firstname,
+            lastname = user.lastname,
+            email = user.email,
+            accessToken = accessToken,
+            refreshToken = jwtRefreshToken
+        )
     }
 
-    fun authenticate(request: AuthenticationRequest): AuthenticationResponse {
-        val user = userRepository.findByEmail(request.email)!!
+    fun authenticate(request: AuthenticationRequest): Pair<AuthenticationStatus, AuthenticationResponse?> {
+        val user = userRepository.findByEmail(request.email) ?: return Pair(AuthenticationStatus.USER_NOT_FOUND, null)
+
+        if (!passwordEncoder.matches(request.password, user.password)) {
+            return Pair(AuthenticationStatus.PASSWORD_INCORRECT, null)
+        }
 
         val jwtRefreshToken = jwtService.generateRefreshToken(user)
         val refreshToken = RefreshToken(
@@ -58,7 +72,13 @@ class AuthenticationService(
         refreshTokenRepository.save(refreshToken)
 
         val accessToken = jwtService.generateAccessToken(user)
-        return AuthenticationResponse(accessToken, jwtRefreshToken)
+        return Pair(AuthenticationStatus.OK, AuthenticationResponse(
+            firstname = user.firstname,
+            lastname = user.lastname,
+            email = user.email,
+            accessToken = accessToken,
+            refreshToken = jwtRefreshToken
+        ))
     }
 
     fun refresh(request: RefreshTokenRequest): AuthenticationResponse? {
@@ -75,6 +95,18 @@ class AuthenticationService(
         refreshTokenRepository.save(refreshToken)
 
         val accessToken = jwtService.generateAccessToken(user)
-        return AuthenticationResponse(accessToken, jwtRefreshToken)
+        return AuthenticationResponse(
+            firstname = user.firstname,
+            lastname = user.lastname,
+            email = user.email,
+            accessToken = accessToken,
+            refreshToken = jwtRefreshToken
+        )
     }
+}
+
+enum class AuthenticationStatus {
+    OK,
+    USER_NOT_FOUND,
+    PASSWORD_INCORRECT
 }

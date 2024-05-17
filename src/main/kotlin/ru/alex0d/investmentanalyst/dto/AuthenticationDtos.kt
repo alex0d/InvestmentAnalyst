@@ -13,6 +13,9 @@ data class AuthenticationRequest(
 )
 
 data class AuthenticationResponse(
+    val firstname: String,
+    val lastname: String?,
+    val email: String,
     val accessToken: String,
     val refreshToken: String
 )
