@@ -15,14 +15,16 @@ import ru.alex0d.investmentanalyst.dto.SellStockRequest
 import ru.alex0d.investmentanalyst.model.PortfolioStock
 import ru.alex0d.investmentanalyst.model.User
 import ru.alex0d.investmentanalyst.repository.PortfolioRepository
-import ru.tinkoff.piapi.contract.v1.LastPrice
+import ru.alex0d.investmentanalyst.repository.PortfolioStockRepository
 import ru.tinkoff.piapi.core.InvestApi
 import java.math.BigDecimal
 import java.math.RoundingMode
+import java.time.LocalDateTime
 
 @Service
 class PortfolioService(
     private val portfolioRepository: PortfolioRepository,
+    private val portfolioStockRepository: PortfolioStockRepository,
     private val investApi: InvestApi
 ) {
     @Value("\${application.finage.key}")
@@ -32,28 +34,29 @@ class PortfolioService(
         val user = SecurityContextHolder.getContext().authentication.principal as User
         val stocks = portfolioRepository.getPortfolioByUser(user).stocks
 
-        val prices = investApi.marketDataService.getLastPricesSync(stocks.map { it.uid })
+        val uids = stocks.map { it.uid }.distinct()
+        val prices = investApi.marketDataService.getLastPricesSync(uids)
 
-        val stockDtos = stocks.map { stock ->
-            val requestedPrice = prices.find { it.instrumentUid == stock.uid } ?: throw Exception("Price not found")
+        val stockDtos = uids.map { uid ->
+            val uidStocks = stocks.filter { it.uid == uid }
+            val lastPrice = prices.find { it.instrumentUid == uid }?.price?.toBigDecimal() ?: throw Exception("Price not found")
 
-            val totalValue = calculateTotalValue(stock, requestedPrice)
-            val profit = calculateProfit(stock, totalValue)
-            val profitPercent = calculateProfitPercent(stock, profit)
-
+            val stockSample = uidStocks.first()
+            val amount = uidStocks.sumOf { it.amount }
+            val averagePrice = uidStocks.sumOf { it.buyingPrice * it.amount.toBigDecimal() } / amount.toBigDecimal()
             PortfolioStockInfoDto(
-                uid = stock.uid,
-                ticker = stock.ticker,
-                name = stock.name,
-                amount = stock.amount,
-                averagePrice = stock.averagePrice,
-                lastPrice = requestedPrice.price.toBigDecimal(),
-                totalValue = totalValue,
-                profit = profit,
-                profitPercent = profitPercent,
-                logoUrl = stock.logoUrl,
-                backgroundColor = stock.backgroundColor,
-                textColor = stock.textColor
+                uid = uid,
+                ticker = stockSample.ticker,
+                name = stockSample.name,
+                amount = amount,
+                averagePrice = averagePrice,
+                lastPrice = lastPrice,
+                totalValue = lastPrice * amount.toBigDecimal(),
+                profit = (lastPrice - averagePrice) * amount.toBigDecimal(),
+                profitPercent = ((lastPrice - averagePrice).setScale(4) / averagePrice * BigDecimal(100)).setScale(2, RoundingMode.HALF_UP),
+                logoUrl = stockSample.logoUrl,
+                backgroundColor = stockSample.backgroundColor,
+                textColor = stockSample.textColor
             )
         }
 
@@ -91,8 +94,8 @@ class PortfolioService(
         }
         val interfaceProperties = requestedStock.unknownFields.getField(60).lengthDelimitedList[0].splitIntoStrings()
 
-        val requestedPrice = try {
-            investApi.marketDataService.getLastPricesSync(listOf(buyStockRequest.uid)).first()
+        val lastPrice = try {
+            investApi.marketDataService.getLastPricesSync(listOf(buyStockRequest.uid)).first().price.toBigDecimal()
         } catch (e: Exception) {
             return false
         }
@@ -100,27 +103,20 @@ class PortfolioService(
         val user = SecurityContextHolder.getContext().authentication.principal as User
         val portfolio = portfolioRepository.getPortfolioByUser(user)
 
-        var stock = portfolio.stocks.find { it.uid == requestedStock.uid }
+        val stock = PortfolioStock(
+            portfolio = portfolio,
+            uid = requestedStock.uid,
+            ticker = requestedStock.ticker,
+            name = requestedStock.name,
+            amount = buyStockRequest.amount,
+            buyingPrice = lastPrice,
+            buyingTime = LocalDateTime.now(),
+            logoUrl = interfaceProperties[0].takeWhile { it != '.' },  // remove file extension
+            backgroundColor = interfaceProperties[1],
+            textColor = interfaceProperties[2],
+        )
 
-        stock?.apply {
-            averagePrice =
-                recalculateAveragePrice(averagePrice, amount, requestedPrice.price.toBigDecimal(), buyStockRequest.amount)
-            amount += buyStockRequest.amount
-        } ?: run {
-            stock = PortfolioStock(
-                portfolio = portfolio,
-                uid = requestedStock.uid,
-                ticker = requestedStock.ticker,
-                name = requestedStock.name,
-                amount = buyStockRequest.amount,
-                averagePrice = requestedPrice.price.toBigDecimal(),
-                logoUrl = interfaceProperties[0].takeWhile { it != '.' },  // remove file extension
-                backgroundColor = interfaceProperties[1],
-                textColor = interfaceProperties[2],
-            )
-            portfolio.stocks.add(stock!!)
-        }
-
+        portfolio.stocks.add(stock)
         portfolioRepository.save(portfolio)
         return true
     }
@@ -129,56 +125,28 @@ class PortfolioService(
         val user = SecurityContextHolder.getContext().authentication.principal as User
         val portfolio = portfolioRepository.getPortfolioByUser(user)
 
-        val stock = portfolio.stocks.find { it.uid == sellStockRequest.uid } ?: return false
+        val stocks = portfolio.stocks.filter { it.uid == sellStockRequest.uid }
+        if (stocks.isEmpty()) return false
 
-        if (stock.amount < sellStockRequest.amount) {
-            return false
-        }
+        var amount = sellStockRequest.amount
+        val stocksToBeDeleted = mutableListOf<PortfolioStock>()
 
-        if (stock.amount == sellStockRequest.amount) {
-            stock.portfolio = null
-            portfolio.stocks.remove(stock)
-        } else {
-            val requestedPrice = try {
-                investApi.marketDataService.getLastPricesSync(listOf(stock.uid)).first()
-            } catch (e: Exception) {
-                return false
+        for (stock in stocks.sortedBy { it.buyingTime }) {
+            if (amount == 0) break
+
+            if (stock.amount > amount) {
+                stock.amount -= amount
+                amount = 0
+            } else {
+                amount -= stock.amount
+                stocksToBeDeleted.add(stock)
+                portfolio.stocks.remove(stock)
             }
-            stock.averagePrice =
-                (stock.averagePrice * stock.amount.toBigDecimal() - requestedPrice.price.toBigDecimal() * sellStockRequest.amount.toBigDecimal()) / (stock.amount.toBigDecimal() - sellStockRequest.amount.toBigDecimal())
-            stock.amount -= sellStockRequest.amount
         }
+        if (amount != 0) return false
 
         portfolioRepository.save(portfolio)
+        portfolioStockRepository.deleteAll(stocksToBeDeleted)
         return true
     }
-}
-
-private fun calculateTotalValue(stock: PortfolioStock, requestedPrice: LastPrice): BigDecimal {
-    return (requestedPrice.price.toBigDecimal() * stock.amount.toBigDecimal()).setScale(2, RoundingMode.HALF_UP)
-}
-
-private fun calculateProfit(stock: PortfolioStock, totalValue: BigDecimal): BigDecimal {
-    return (totalValue - stock.amount.toBigDecimal() * stock.averagePrice).setScale(2, RoundingMode.HALF_UP)
-}
-
-private fun calculateProfitPercent(stock: PortfolioStock, profit: BigDecimal): BigDecimal {
-    return (profit.setScale(4) / (stock.amount.toBigDecimal() * stock.averagePrice) * BigDecimal(100)).setScale(
-        2,
-        RoundingMode.HALF_UP
-    )
-}
-
-private fun recalculateAveragePrice(
-    oldAveragePrice: BigDecimal,
-    oldAmount: Int,
-    newBuyingPrice: BigDecimal,
-    newAmount: Int
-): BigDecimal {
-    val oldAmount = oldAmount.toBigDecimal()
-    val newAmount = newAmount.toBigDecimal()
-    return (oldAveragePrice * oldAmount + newBuyingPrice * newAmount) / (oldAmount + newAmount).setScale(
-        2,
-        RoundingMode.HALF_UP
-    )
 }

@@ -3,6 +3,7 @@ package ru.alex0d.investmentanalyst.model
 import com.fasterxml.jackson.annotation.JsonIgnore
 import jakarta.persistence.*
 import java.math.BigDecimal
+import java.time.LocalDateTime
 
 @Entity
 @Table(name = "portfolio_stocks")
@@ -16,7 +17,8 @@ class PortfolioStock(
     var name: String,
 
     var amount: Int,
-    var averagePrice: BigDecimal,
+    var buyingPrice: BigDecimal,
+    var buyingTime: LocalDateTime,
 
     var logoUrl: String,
     var backgroundColor: String,
