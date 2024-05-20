@@ -17,8 +17,6 @@ spring:
 application:
   fmpcloud:
     key: ${FMPCLOUD_KEY}
-  finage:
-    key: ${FINAGE_KEY}
   tinkoff:
     key: ${TINKOFF_KEY}
   openai:

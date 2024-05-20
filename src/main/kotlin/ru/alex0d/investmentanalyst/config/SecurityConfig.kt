@@ -39,5 +39,5 @@ class SecurityConfig(
                     .authenticationEntryPoint(AuthenticatedEntryPoint())
             }
             .build()
-        }
     }
+}

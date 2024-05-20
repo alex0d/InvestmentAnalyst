@@ -1,11 +1,7 @@
 package ru.alex0d.investmentanalyst.service
 
-import kotlinx.serialization.json.Json
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
-import ru.alex0d.investmentanalyst.api.finage.MarketNews
-import ru.alex0d.investmentanalyst.api.makeRequest
 import ru.alex0d.investmentanalyst.api.utils.splitIntoStrings
 import ru.alex0d.investmentanalyst.api.utils.toBigDecimal
 import ru.alex0d.investmentanalyst.dto.BuyStockRequest
@@ -27,8 +23,6 @@ class PortfolioService(
     private val portfolioStockRepository: PortfolioStockRepository,
     private val investApi: InvestApi
 ) {
-    @Value("\${application.finage.key}")
-    private lateinit var finageApiKey: String
 
     fun getPortfolio(): PortfolioInfoDto {
         val user = SecurityContextHolder.getContext().authentication.principal as User
@@ -72,18 +66,6 @@ class PortfolioService(
             totalProfitPercent = totalProfitPercent,
             stocks = stockDtos
         )
-    }
-
-    fun getPortfolioNews(): List<MarketNews> {
-        val user = SecurityContextHolder.getContext().authentication.principal as User
-        val stocks = portfolioRepository.getPortfolioByUser(user).stocks
-
-        val news = stocks.map { stock ->
-            val body = makeRequest("https://api.finage.co.uk/news/market/${stock.ticker}?apikey=$finageApiKey")
-                ?: return emptyList()
-            Json.decodeFromString<MarketNews>(body)
-        }
-        return news
     }
 
     fun buyStock(buyStockRequest: BuyStockRequest): Boolean {
