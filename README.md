@@ -1,7 +1,7 @@
 # Investment Analyst
 
 ## Deploy using Docker Compose
-1. Get [Fmp Cloud API Key](https://fmpcloud.io/) and [Finage API Key](https://finage.co.uk/)
+1. Get [Tinkoff Invest API Token](https://tinkoff.github.io/investAPI/token/) and [OpenAI API Key](https://platform.openai.com/api-keys)
 2. Edit .env file to set up your own credentials
 3. Run the following
     ```bash

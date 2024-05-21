@@ -15,8 +15,6 @@ spring:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
 
 application:
-  fmpcloud:
-    key: ${FMPCLOUD_KEY}
   tinkoff:
     key: ${TINKOFF_KEY}
   openai:

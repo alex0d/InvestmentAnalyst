@@ -22,10 +22,6 @@ class User(
     @JsonIgnore
     var portfolio: Portfolio,
 
-    @OneToMany(mappedBy = "user", cascade = [CascadeType.ALL], fetch = FetchType.EAGER)
-    @JsonIgnore
-    var watchlists: MutableList<Watchlist> = mutableListOf(),
-
     @Id @GeneratedValue
     var id: Int = 0
 ) : UserDetails {

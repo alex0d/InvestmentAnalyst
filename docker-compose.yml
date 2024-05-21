@@ -7,8 +7,6 @@ services:
     environment:
       POSTGRESQL_USERNAME: ${POSTGRESQL_USERNAME:-username}
       POSTGRESQL_PASSWORD: ${POSTGRESQL_PASSWORD:-password}
-      FMPCLOUD_KEY: ${FMPCLOUD_KEY}
-      FINAGE_KEY: ${FINAGE_KEY}
       TINKOFF_KEY: ${TINKOFF_KEY}
       OPENAI_KEY: ${OPENAI_KEY}
     ports:
