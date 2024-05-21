@@ -6,6 +6,7 @@ import io.swagger.v3.oas.models.info.Contact
 import io.swagger.v3.oas.models.info.Info
 import io.swagger.v3.oas.models.security.SecurityRequirement
 import io.swagger.v3.oas.models.security.SecurityScheme
+import io.swagger.v3.oas.models.servers.Server
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
@@ -19,7 +20,7 @@ class SwaggerConfig {
                 Info()
                     .title("Investment Analyst API")
                     .description("API for Investment Analyst application")
-                    .contact(Contact().name("Aleksey Denisov").url("http://invest.alex0d.ru"))
+                    .contact(Contact().name("Aleksey Denisov").url("http://alex0d.ru"))
                     .version("1.0.0")
             )
             .addSecurityItem(
@@ -33,6 +34,11 @@ class SwaggerConfig {
                             .scheme("bearer")
                             .bearerFormat("JWT")
                     )
+            )
+            .servers(
+                listOf(
+                    Server().url("https://invest.alex0d.ru")
+                )
             )
     }
 }
