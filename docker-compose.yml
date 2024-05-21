@@ -5,7 +5,7 @@ services:
       context: .
       dockerfile: Dockerfile
     environment:
-      POSTGRESQL_URL: ${POSTGRESQL_URL:-jdbc:postgresql://postgresql:5432/invest}
+      POSTGRESQL_URL: ${POSTGRESQL_URL:-postgresql:5432/invest}
       POSTGRESQL_USERNAME: ${POSTGRESQL_USERNAME:-postgres}
       POSTGRESQL_PASSWORD: ${POSTGRESQL_PASSWORD:-root}
       TINKOFF_KEY: ${TINKOFF_KEY}
