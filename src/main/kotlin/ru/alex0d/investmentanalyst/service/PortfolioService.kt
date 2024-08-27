@@ -1,6 +1,8 @@
 package ru.alex0d.investmentanalyst.service
 
 import io.micrometer.core.annotation.Timed
+import kotlinx.coroutines.future.asDeferred
+import kotlinx.coroutines.runBlocking
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
 import ru.alex0d.investmentanalyst.api.utils.splitIntoStrings
@@ -71,39 +73,34 @@ class PortfolioService(
     }
 
     @Timed("service_portfolio_buyStock")
-    fun buyStock(buyStockRequest: BuyStockRequest): Boolean {
-        val requestedStock = try {
-            investApi.instrumentsService.getShareByUidSync(buyStockRequest.uid)
-        } catch (e: Exception) {
-            return false
-        }
-        val interfaceProperties = requestedStock.unknownFields.getField(60).lengthDelimitedList[0].splitIntoStrings()
+    fun buyStock(buyStockRequest: BuyStockRequest): Boolean = runBlocking {
+        val shareInfoDeferred = investApi.instrumentsService.getShareByUid(buyStockRequest.uid).asDeferred()
+        val lastPriceDeferred = investApi.marketDataService.getLastPrices(listOf(buyStockRequest.uid)).asDeferred()
 
-        val lastPrice = try {
-            investApi.marketDataService.getLastPricesSync(listOf(buyStockRequest.uid)).first().price.toBigDecimal()
-        } catch (e: Exception) {
-            return false
-        }
+        val shareInfo = shareInfoDeferred.await() ?: return@runBlocking false
+        val lastPrice = lastPriceDeferred.await()?.firstOrNull()?.price?.toBigDecimal() ?: return@runBlocking false
+
+        val uiExtraData = shareInfo.unknownFields.getField(60).lengthDelimitedList[0].splitIntoStrings()
 
         val user = SecurityContextHolder.getContext().authentication.principal as User
         val portfolio = portfolioRepository.getPortfolioByUser(user)
 
         val stock = PortfolioStock(
             portfolio = portfolio,
-            uid = requestedStock.uid,
-            ticker = requestedStock.ticker,
-            name = requestedStock.name,
+            uid = shareInfo.uid,
+            ticker = shareInfo.ticker,
+            name = shareInfo.name,
             amount = buyStockRequest.amount,
             buyingPrice = lastPrice,
             buyingTime = LocalDateTime.now(),
-            logoUrl = interfaceProperties[0].takeWhile { it != '.' },  // remove file extension
-            backgroundColor = interfaceProperties[1],
-            textColor = interfaceProperties[2],
+            logoUrl = uiExtraData[0].takeWhile { it != '.' },  // remove file extension
+            backgroundColor = uiExtraData[1],
+            textColor = uiExtraData[2],
         )
 
         portfolio.stocks.add(stock)
         portfolioRepository.save(portfolio)
-        return true
+        true
     }
 
     @Timed("service_portfolio_sellStock")
