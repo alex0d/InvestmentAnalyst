@@ -23,9 +23,9 @@ enum class TarotCard {
     TEMPERANCE,
     THE_DEVIL,
     THE_TOWER,
-    THE_STAR,
     THE_MOON,
-//    THE_SUN,
+    THE_SUN,
+//    THE_STAR,
 //    JUDGEMENT,
 //    THE_WORLD
 }
@@ -48,9 +48,9 @@ fun TarotCard.toRussianName() = when(this) {
     TarotCard.TEMPERANCE -> "Умеренность"
     TarotCard.THE_DEVIL -> "Дьявол"
     TarotCard.THE_TOWER -> "Башня"
-    TarotCard.THE_STAR -> "Звезда"
     TarotCard.THE_MOON -> "Луна"
-//    TarotCard.THE_SUN -> "Солнце"
+    TarotCard.THE_SUN -> "Солнце"
+//    TarotCard.THE_STAR -> "Звезда"
 //    TarotCard.JUDGEMENT -> "Суд"
 //    TarotCard.THE_WORLD -> "Мир"
 }
