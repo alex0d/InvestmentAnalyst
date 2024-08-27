@@ -1,5 +1,6 @@
 package ru.alex0d.investmentanalyst.service
 
+import io.micrometer.core.annotation.Timed
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
 import ru.alex0d.investmentanalyst.api.utils.splitIntoStrings
@@ -24,6 +25,7 @@ class PortfolioService(
     private val investApi: InvestApi
 ) {
 
+    @Timed("service_portfolio_getPortfolio")
     fun getPortfolio(): PortfolioInfoDto {
         val user = SecurityContextHolder.getContext().authentication.principal as User
         val stocks = portfolioRepository.getPortfolioByUser(user).stocks
@@ -68,6 +70,7 @@ class PortfolioService(
         )
     }
 
+    @Timed("service_portfolio_buyStock")
     fun buyStock(buyStockRequest: BuyStockRequest): Boolean {
         val requestedStock = try {
             investApi.instrumentsService.getShareByUidSync(buyStockRequest.uid)
@@ -103,6 +106,7 @@ class PortfolioService(
         return true
     }
 
+    @Timed("service_portfolio_sellStock")
     fun sellStock(sellStockRequest: SellStockRequest): Boolean {
         val user = SecurityContextHolder.getContext().authentication.principal as User
         val portfolio = portfolioRepository.getPortfolioByUser(user)
