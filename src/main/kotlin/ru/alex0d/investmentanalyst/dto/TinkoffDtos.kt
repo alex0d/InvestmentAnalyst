@@ -1,6 +1,5 @@
 package ru.alex0d.investmentanalyst.dto
 
-import ru.alex0d.investmentanalyst.api.utils.splitIntoStrings
 import ru.tinkoff.piapi.contract.v1.Share
 import java.math.BigDecimal
 
@@ -32,13 +31,10 @@ data class TinkoffShare(
         countryOfRisk = share.countryOfRisk,
         countryOfRiskName = share.countryOfRiskName,
         sector = share.sector,
-        lot = share.lot
-    ) {
-        this.lastPrice = lastPrice
-
-        val interfaceProperties = share.unknownFields.getField(60).lengthDelimitedList[0].splitIntoStrings()
-        url = interfaceProperties[0].takeWhile { it != '.' }
-        backgroundColor = interfaceProperties[1]
-        textColor = interfaceProperties[2]
-    }
+        lot = share.lot,
+        lastPrice = lastPrice,
+        url = share.brand.logoName,
+        backgroundColor = share.brand.logoBaseColor,
+        textColor = share.brand.textColor
+    )
 }

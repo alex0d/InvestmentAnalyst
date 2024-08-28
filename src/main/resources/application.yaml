@@ -17,8 +17,9 @@ spring:
 application:
   tinkoff:
     key: ${TINKOFF_KEY}
-  openai:
-    key: ${OPENAI_KEY}
+  yandex:
+    key: ${YANDEX_KEY}
+    folder-id: ${YANDEX_FOLDER_ID}
   security:
     jwt:
       secret-key: a89c1f6f36f57fda65f1155a296c1a068b3d70903bfbbe87a324556436403a91

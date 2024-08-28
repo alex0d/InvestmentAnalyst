@@ -9,7 +9,8 @@ services:
       POSTGRESQL_USERNAME: ${POSTGRESQL_USERNAME:-postgres}
       POSTGRESQL_PASSWORD: ${POSTGRESQL_PASSWORD:-root}
       TINKOFF_KEY: ${TINKOFF_KEY}
-      OPENAI_KEY: ${OPENAI_KEY}
+      YANDEX_KEY: ${TINKOFF_KEY}
+      YANDEX_FOLDER_ID: ${YANDEX_FOLDER_ID}
     ports:
       - "8080:8080"
     depends_on:

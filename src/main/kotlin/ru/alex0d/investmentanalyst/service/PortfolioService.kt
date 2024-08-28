@@ -5,7 +5,6 @@ import kotlinx.coroutines.future.asDeferred
 import kotlinx.coroutines.runBlocking
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
-import ru.alex0d.investmentanalyst.api.utils.splitIntoStrings
 import ru.alex0d.investmentanalyst.api.utils.toBigDecimal
 import ru.alex0d.investmentanalyst.dto.BuyStockRequest
 import ru.alex0d.investmentanalyst.dto.PortfolioInfoDto
@@ -80,8 +79,6 @@ class PortfolioService(
         val shareInfo = shareInfoDeferred.await() ?: return@runBlocking false
         val lastPrice = lastPriceDeferred.await()?.firstOrNull()?.price?.toBigDecimal() ?: return@runBlocking false
 
-        val uiExtraData = shareInfo.unknownFields.getField(60).lengthDelimitedList[0].splitIntoStrings()
-
         val user = SecurityContextHolder.getContext().authentication.principal as User
         val portfolio = portfolioRepository.getPortfolioByUser(user)
 
@@ -93,9 +90,9 @@ class PortfolioService(
             amount = buyStockRequest.amount,
             buyingPrice = lastPrice,
             buyingTime = LocalDateTime.now(),
-            logoUrl = uiExtraData[0].takeWhile { it != '.' },  // remove file extension
-            backgroundColor = uiExtraData[1],
-            textColor = uiExtraData[2],
+            logoUrl = shareInfo.brand.logoName,
+            backgroundColor = shareInfo.brand.logoBaseColor,
+            textColor = shareInfo.brand.textColor,
         )
 
         portfolio.stocks.add(stock)
