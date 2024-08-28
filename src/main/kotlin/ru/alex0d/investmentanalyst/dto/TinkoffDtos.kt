@@ -33,7 +33,7 @@ data class TinkoffShare(
         sector = share.sector,
         lot = share.lot,
         lastPrice = lastPrice,
-        url = share.brand.logoName,
+        url = share.brand.logoName.takeWhile { it != '.' },
         backgroundColor = share.brand.logoBaseColor,
         textColor = share.brand.textColor
     )

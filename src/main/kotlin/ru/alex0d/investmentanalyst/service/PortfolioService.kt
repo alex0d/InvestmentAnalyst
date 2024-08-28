@@ -90,7 +90,7 @@ class PortfolioService(
             amount = buyStockRequest.amount,
             buyingPrice = lastPrice,
             buyingTime = LocalDateTime.now(),
-            logoUrl = shareInfo.brand.logoName,
+            logoUrl = shareInfo.brand.logoName.takeWhile { it != '.' },
             backgroundColor = shareInfo.brand.logoBaseColor,
             textColor = shareInfo.brand.textColor,
         )
